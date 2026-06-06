@@ -1,0 +1,19 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+logs/
+data/quarentena/
+# *.joblib removido do ignore — modelo incluso no repo (não contém dados pessoais)
+.DS_Store
+
+# Planilhas de dados — contêm PII (LGPD); nunca versionar
+*.xlsx
+*.xls
+*.csv
+
+# Streamlit secrets locais (use o Streamlit Cloud Secrets para produção)
+.streamlit/secrets.toml
