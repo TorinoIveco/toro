@@ -33,6 +33,7 @@ navegacao = st.navigation(
         st.Page("views/scoring.py", title="Lead Scoring", icon="🎯"),
         st.Page("views/produtos.py", title="Análise de Produtos", icon="📦"),
         st.Page("views/assistente.py", title="Assistente IA", icon="🤖"),
+        st.Page("views/exportar.py", title="Exportar Contatos", icon="📧"),
         st.Page("views/importar.py", title="Atualizar Dados", icon="⚙️"),
     ]
 )
