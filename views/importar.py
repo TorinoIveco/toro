@@ -9,6 +9,7 @@ import streamlit as st
 
 from toro_insights.analytics import kpis as K
 from toro_insights.etl import nf_pipeline, pipeline
+from toro_insights.etl.template import XLSX_MIME, template_leads, template_nf
 from toro_insights.presentation.ui import cabecalho, fmt_int, fmt_reais, get_dados, limpar_cache
 
 cabecalho(
@@ -49,6 +50,14 @@ with aba_leads:
         "Carregue o export **consolidado** do Dynamics (*Leads Qualificados*, todos os status). "
         "⚠️ Esta carga **substitui toda a base de leads** (snapshot)."
     )
+    st.download_button(
+        "📄 Baixar planilha-modelo (Leads)",
+        data=template_leads(),
+        file_name="modelo_leads.xlsx",
+        mime=XLSX_MIME,
+        help="Planilha vazia com todas as colunas esperadas, na aba 'Leads Qualificados'. "
+        "Preencha e suba abaixo.",
+    )
     up = st.file_uploader("Planilha de Leads (.xlsx)", type=["xlsx"], key="up_leads")
     confirma = st.checkbox("Confirmo que este arquivo substitui a base atual de leads.")
     if up and st.button("Carregar leads", type="primary", disabled=not confirma):
@@ -75,6 +84,14 @@ with aba_nf:
     st.markdown(
         "Carregue o relatório de **faturamento (itens de NF)** do ERP. "
         "Casa a receita às vendas por GUID e atualiza `valor_faturado`."
+    )
+    st.download_button(
+        "📄 Baixar planilha-modelo (NF)",
+        data=template_nf(),
+        file_name="modelo_faturamento.xlsx",
+        mime=XLSX_MIME,
+        help="Planilha vazia com as colunas de faturamento (1 linha por item de NF). "
+        "A coluna 'Oportunidade' deve ter o mesmo GUID do lead.",
     )
     up_nf = st.file_uploader("Planilha de NF (.xlsx)", type=["xlsx"], key="up_nf")
     if up_nf and st.button("Importar faturamento", type="primary"):
