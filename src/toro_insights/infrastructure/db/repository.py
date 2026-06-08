@@ -7,7 +7,7 @@ from datetime import date
 import pandas as pd
 from sqlalchemy import Engine, text
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlalchemy.types import Date
+from sqlalchemy.types import Date, Numeric
 
 from toro_insights.config.settings import get_settings
 from toro_insights.domain.constants import BUCKET_NAO_MAPEADO, ORDEM_NAO_MAPEADO
@@ -135,13 +135,28 @@ class CrmLeadRepository:
 
     # ---------------------------------------------------------- nf_faturamento
     def truncar_e_carregar_nf(self, df: pd.DataFrame) -> int:
-        """TRUNCATE em nf_faturamento e recarrega os itens (snapshot)."""
+        """TRUNCATE em nf_faturamento e recarrega os itens (snapshot).
+
+        A última planilha SEMPRE substitui a base (mesmo vazia ou com colunas
+        numéricas em branco). Os tipos são forçados no `dtype` para que valores
+        ausentes (None) não sejam inferidos como texto e colidam com as colunas
+        `numeric`/`date` do banco.
+        """
         with self._engine.begin() as conn:
             conn.execute(text(f"TRUNCATE TABLE {self._schema}.nf_faturamento RESTART IDENTITY"))
+            if df.empty:
+                # Snapshot vazio: base zerada, nada a inserir.
+                return 0
             df.to_sql(
                 "nf_faturamento", conn, schema=self._schema, if_exists="append",
                 index=False, method="multi", chunksize=1000,
-                dtype={"oportunidade_id": PG_UUID(as_uuid=False), "data_emissao": Date()},
+                dtype={
+                    "oportunidade_id": PG_UUID(as_uuid=False),
+                    "data_emissao": Date(),
+                    "quantidade": Numeric(),
+                    "valor_unitario": Numeric(),
+                    "valor_total": Numeric(),
+                },
             )
         return len(df)
 
