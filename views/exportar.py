@@ -61,6 +61,8 @@ with c2:
     ano_sel = _multi("Ano", "ano")
     uf_sel = _multi("Estado (UF)", "uf")
     campanha_sel = _multi("Campanha", "campanha")
+    produto_sel = _multi("Produto de Interesse", "produto_interesse")
+    modelo_sel = _multi("Modelo de Interesse", "modelo_interesse")
 
 # ---------------------------------------------------------------- Aplica filtros
 sel = df.copy()
@@ -74,6 +76,10 @@ if uf_sel:
     sel = sel[sel["uf"].astype(str).isin(uf_sel)]
 if campanha_sel:
     sel = sel[sel["campanha"].astype(str).isin(campanha_sel)]
+if produto_sel:
+    sel = sel[sel["produto_interesse"].astype(str).isin(produto_sel)]
+if modelo_sel:
+    sel = sel[sel["modelo_interesse"].astype(str).isin(modelo_sel)]
 
 # ---------------------------------------------------------- Monta planilha Brevo
 planilha = brevo.montar_planilha_brevo(sel)

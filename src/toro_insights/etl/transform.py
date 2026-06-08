@@ -20,7 +20,8 @@ _COLUNAS_SAIDA = [
     "oportunidade_id", "data_criacao", "data_modificacao", "data_associacao_vendedor",
     "data_primeiro_atendimento", "data_prevista_faturamento", "ano", "cliente_nome",
     "documento", "documento_hash", "tipo_pessoa", "celular", "email", "campanha",
-    "concessionaria", "vendedor", "cidade", "uf", "necessidade", "status_relacionamento",
+    "concessionaria", "vendedor", "cidade", "uf", "necessidade",
+    "produto_interesse", "modelo_interesse", "status_relacionamento",
     "fase_negocio", "razao_status", "bucket_funil", "ordem_funil", "tempo_atendimento_horas",
     "tempo_resposta_horas", "dias_no_funil", "venda_concretizada", "target_ml",
     "is_perda", "flag_data_inconsistente",
@@ -66,7 +67,8 @@ def transformar(df: pd.DataFrame, mapa_fases: pd.DataFrame, salt: str) -> pd.Dat
     df = df.copy()
 
     # Normaliza dimensões textuais (geo em caixa alta, trim).
-    for col in ("cidade", "concessionaria", "campanha", "necessidade", "status_relacionamento"):
+    for col in ("cidade", "concessionaria", "campanha", "necessidade", "status_relacionamento",
+                "produto_interesse", "modelo_interesse"):
         if col in df.columns:
             df[col] = df[col].astype("string").str.strip()
     df["cidade"] = df["cidade"].str.upper()

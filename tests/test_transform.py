@@ -63,3 +63,21 @@ def test_df_vazio_retorna_colunas():
     out = transform.transformar(pd.DataFrame(), _mapa_fases(), salt="t")
     assert out.empty
     assert "target_ml" in out.columns
+
+
+def test_produto_e_modelo_de_interesse():
+    df = _df_valido()
+    df["produto_interesse"] = "  Caminhão  "
+    df["modelo_interesse"] = "S-Way"
+    out = transform.transformar(df, _mapa_fases(), salt="t")
+    row = out.iloc[0]
+    assert row["produto_interesse"] == "Caminhão"  # strip aplicado
+    assert row["modelo_interesse"] == "S-Way"
+
+
+def test_retrocompat_sem_colunas_de_interesse():
+    # Planilha antiga (sem as colunas novas) não deve quebrar; colunas viram NA.
+    out = transform.transformar(_df_valido(), _mapa_fases(), salt="t")
+    assert "produto_interesse" in out.columns
+    assert "modelo_interesse" in out.columns
+    assert pd.isna(out.iloc[0]["produto_interesse"])

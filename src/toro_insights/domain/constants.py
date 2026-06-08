@@ -31,6 +31,8 @@ COLUMN_MAP: dict[str, str] = {
     "Cidade (Conta) (Conta)": "cidade",
     "Estado (Conta) (Conta)": "uf",
     "Data de Previsão do Faturamento": "data_prevista_faturamento",
+    "Produto de Interesse": "produto_interesse",
+    "Modelo de Interesse": "modelo_interesse",
 }
 
 #: Mapeamento: cabeçalho do relatório de NF (ERP) -> coluna destino em nf_faturamento.

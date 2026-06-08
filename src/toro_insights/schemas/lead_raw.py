@@ -38,6 +38,8 @@ class LeadRaw(BaseModel):
     celular: str | None = None
     email: str | None = None
     necessidade: str | None = None
+    produto_interesse: str | None = None
+    modelo_interesse: str | None = None
     cidade: str | None = None
     uf: str | None = None
 

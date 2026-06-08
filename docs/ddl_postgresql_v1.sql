@@ -101,6 +101,8 @@ CREATE TABLE IF NOT EXISTS toro.crm_leads (
     cidade                    TEXT,
     uf                        CHAR(2),
     necessidade               TEXT,
+    produto_interesse         TEXT,
+    modelo_interesse          TEXT,
     status_relacionamento     TEXT,
     -- status / funil
     fase_negocio              TEXT REFERENCES toro.dim_fase_negocio(fase_original),
@@ -118,6 +120,10 @@ CREATE TABLE IF NOT EXISTS toro.crm_leads (
     -- qualidade
     flag_data_inconsistente   BOOLEAN NOT NULL DEFAULT FALSE
 );
+
+-- Migração idempotente: colunas adicionadas após o schema inicial.
+ALTER TABLE toro.crm_leads ADD COLUMN IF NOT EXISTS produto_interesse TEXT;
+ALTER TABLE toro.crm_leads ADD COLUMN IF NOT EXISTS modelo_interesse  TEXT;
 
 -- ------------------------------------------------------------
 -- 3b) Itens de faturamento (NF) — grão de item (1 oportunidade : N itens)
