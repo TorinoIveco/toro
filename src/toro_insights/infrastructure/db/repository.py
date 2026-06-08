@@ -110,6 +110,21 @@ class CrmLeadRepository:
             )
         return len(df)
 
+    def limpar_base(self) -> None:
+        """Apaga TODOS os dados de leads e de faturamento (operação destrutiva).
+
+        Trunca `crm_leads` e `nf_faturamento` numa única transação. As tabelas
+        de governança (`dim_fase_negocio`) e de auditoria (`etl_carga`) são
+        preservadas. Use com confirmação explícita do usuário.
+        """
+        with self._engine.begin() as conn:
+            conn.execute(
+                text(
+                    f"TRUNCATE TABLE {self._schema}.crm_leads, "
+                    f"{self._schema}.nf_faturamento RESTART IDENTITY"
+                )
+            )
+
     def atualizar_valor_faturado(self, oportunidade_id: str, valor: float) -> None:
         """RN-13 — grava o Valor Faturado (vindo da NF) em uma oportunidade."""
         stmt = text(

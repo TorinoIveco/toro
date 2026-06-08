@@ -79,6 +79,32 @@ with aba_leads:
         finally:
             os.unlink(caminho)
 
+    # ------------------------------------------------- Zona de perigo: limpar base
+    st.divider()
+    with st.expander("🗑️ Zona de perigo — Limpar base"):
+        st.warning(
+            "Isso **apaga TODOS os leads e o faturamento (NF)** do banco. "
+            "Ação **irreversível** — não há como desfazer."
+        )
+        palavra = st.text_input(
+            "Para confirmar, digite **LIMPAR** abaixo:", key="confirma_limpar"
+        )
+        if st.button(
+            "Limpar base agora",
+            type="primary",
+            disabled=palavra.strip().upper() != "LIMPAR",
+        ):
+            try:
+                from toro_insights.infrastructure.db.engine import get_engine
+                from toro_insights.infrastructure.db.repository import CrmLeadRepository
+
+                with st.spinner("Apagando todos os dados..."):
+                    CrmLeadRepository(get_engine()).limpar_base()
+                limpar_cache()
+                st.success("Base limpa: todos os leads e o faturamento foram removidos.")
+            except Exception as exc:  # noqa: BLE001
+                st.error(f"Falha ao limpar a base: {exc}")
+
 # ------------------------------------------------------------- NF
 with aba_nf:
     st.markdown(
