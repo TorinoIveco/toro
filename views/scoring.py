@@ -57,7 +57,16 @@ with col_a:
 
 # ------------------------------------------------------- Scoring dos leads
 df = get_dados()
-scored = S.pontuar(df, bundle)
+try:
+    scored = S.pontuar(df, bundle)
+except Exception as exc:  # noqa: BLE001
+    st.error(
+        "Não foi possível pontuar os leads com o modelo salvo. Isso normalmente "
+        "ocorre quando a versão do XGBoost no servidor difere da que treinou o "
+        "modelo. Retreine o modelo na aba **⚙️ Atualizar Dados → Modelo**."
+    )
+    st.caption(f"Detalhe técnico: {type(exc).__name__}: {exc}")
+    st.stop()
 
 with col_b:
     st.subheader("Distribuição por faixa")
