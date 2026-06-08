@@ -58,6 +58,7 @@ with c2:
         opcoes = sorted(str(x) for x in df[coluna].dropna().unique())
         return st.multiselect(label, opcoes)
 
+    ano_sel = _multi("Ano", "ano")
     uf_sel = _multi("Estado (UF)", "uf")
     campanha_sel = _multi("Campanha", "campanha")
 
@@ -67,6 +68,8 @@ if tem_score and prob_min > 0:
     sel = sel[sel["probabilidade"] >= prob_min]
 if excluir_clientes and "venda_concretizada" in sel.columns:
     sel = sel[~sel["venda_concretizada"].fillna(False).astype(bool)]
+if ano_sel:
+    sel = sel[sel["ano"].astype(str).isin(ano_sel)]
 if uf_sel:
     sel = sel[sel["uf"].astype(str).isin(uf_sel)]
 if campanha_sel:
