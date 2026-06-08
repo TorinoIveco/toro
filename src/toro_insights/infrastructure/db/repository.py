@@ -196,9 +196,21 @@ class CrmLeadRepository:
         with self._engine.connect() as conn:
             return int(conn.execute(stmt).scalar_one())
 
+    #: Colunas NUMERIC que o Postgres devolve como Decimal (dtype object).
+    #: Precisam virar float para operações pandas (sum/nlargest/pivot).
+    _NF_COLS_NUMERICAS = ("quantidade", "valor_unitario", "valor_total")
+
+    def _normalizar_numericos_nf(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Converte colunas NUMERIC (Decimal -> float) para uso em pandas."""
+        for col in self._NF_COLS_NUMERICAS:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors="coerce")
+        return df
+
     def buscar_nf(self) -> pd.DataFrame:
         """Itens de NF para a camada de analytics de produtos."""
-        return pd.read_sql(text(f"SELECT * FROM {self._schema}.nf_faturamento"), self._engine)
+        df = pd.read_sql(text(f"SELECT * FROM {self._schema}.nf_faturamento"), self._engine)
+        return self._normalizar_numericos_nf(df)
 
     def buscar_nf_enriquecido(self) -> pd.DataFrame:
         """Itens de NF + dimensões da venda (geo, loja, campanha) para a Tela de Produtos."""
@@ -212,7 +224,7 @@ class CrmLeadRepository:
             JOIN {self._schema}.crm_leads c ON c.oportunidade_id = n.oportunidade_id
             """
         )
-        return pd.read_sql(query, self._engine)
+        return self._normalizar_numericos_nf(pd.read_sql(query, self._engine))
 
     def buscar_leads(self, where: str = "", params: dict | None = None) -> pd.DataFrame:
         """Leitura genérica para a camada de analytics/dashboards."""

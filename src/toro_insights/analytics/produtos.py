@@ -41,6 +41,8 @@ def por_dimensao(df: pd.DataFrame, coluna: str, top: int | None = None) -> pd.Da
         return pd.DataFrame(columns=[coluna, "unidades", "receita", "ticket_medio"])
     g = df.copy()
     g[coluna] = g[coluna].fillna(ROTULO_NULO).replace("", ROTULO_NULO)
+    g["quantidade"] = pd.to_numeric(g["quantidade"], errors="coerce")
+    g["valor_total"] = pd.to_numeric(g["valor_total"], errors="coerce")
     agg = (
         g.groupby(coluna)
         .agg(unidades=("quantidade", "sum"), receita=("valor_total", "sum"))
@@ -57,6 +59,7 @@ def matriz_gama_cidade(df: pd.DataFrame, top_cidades: int = 10) -> pd.DataFrame:
         return pd.DataFrame()
     g = df.copy()
     g["cidade"] = g["cidade"].fillna(ROTULO_NULO)
+    g["quantidade"] = pd.to_numeric(g["quantidade"], errors="coerce")
     top = g.groupby("cidade")["quantidade"].sum().nlargest(top_cidades).index
     g = g[g["cidade"].isin(top)]
     return g.pivot_table(
