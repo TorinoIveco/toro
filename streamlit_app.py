@@ -17,24 +17,26 @@ if str(_src) not in sys.path:
 
 import streamlit as st
 
-from toro_insights.presentation.auth import botao_sair, require_login
+from toro_insights.presentation.auth import botao_sair, eh_gerente, require_login
 
 st.set_page_config(page_title="TORO Insights", page_icon="🚛", layout="wide")
 
 require_login()
 botao_sair()
 
-navegacao = st.navigation(
-    [
-        st.Page("views/dashboard.py", title="Dashboard Executivo", icon="📊", default=True),
-        st.Page("views/funil.py", title="Funil Comercial", icon="🫙"),
-        st.Page("views/campanhas.py", title="Análise de Campanhas", icon="📣"),
-        st.Page("views/geografia.py", title="Inteligência Geográfica", icon="🗺️"),
-        st.Page("views/scoring.py", title="Lead Scoring", icon="🎯"),
-        st.Page("views/produtos.py", title="Análise de Produtos", icon="📦"),
-        st.Page("views/assistente.py", title="Assistente IA", icon="🤖"),
-        st.Page("views/exportar.py", title="Exportar Contatos", icon="📧"),
-        st.Page("views/importar.py", title="Atualizar Dados", icon="⚙️"),
-    ]
-)
-navegacao.run()
+paginas = [
+    st.Page("views/dashboard.py", title="Dashboard Executivo", icon="📊", default=True),
+    st.Page("views/funil.py", title="Funil Comercial", icon="🫙"),
+    st.Page("views/campanhas.py", title="Análise de Campanhas", icon="📣"),
+    st.Page("views/geografia.py", title="Inteligência Geográfica", icon="🗺️"),
+    st.Page("views/scoring.py", title="Lead Scoring", icon="🎯"),
+    st.Page("views/produtos.py", title="Análise de Produtos", icon="📦"),
+    st.Page("views/assistente.py", title="Assistente IA", icon="🤖"),
+    st.Page("views/exportar.py", title="Exportar Contatos", icon="📧"),
+]
+
+# "Atualizar Dados" (cargas/limpeza/treino) é exclusiva do perfil gerente.
+if eh_gerente():
+    paginas.append(st.Page("views/importar.py", title="Atualizar Dados", icon="⚙️"))
+
+st.navigation(paginas).run()

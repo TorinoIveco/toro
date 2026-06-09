@@ -10,12 +10,19 @@ import streamlit as st
 from toro_insights.analytics import kpis as K
 from toro_insights.etl import nf_pipeline, pipeline
 from toro_insights.etl.template import XLSX_MIME, template_leads, template_nf
+from toro_insights.presentation.auth import eh_gerente
 from toro_insights.presentation.ui import cabecalho, fmt_int, fmt_reais, get_dados, limpar_cache
 
 cabecalho(
     "⚙️ Atualizar Dados",
     "Importe as planilhas do Dynamics (leads) e do ERP (faturamento) e atualize a base.",
 )
+
+# Defesa em profundidade: além de a página não aparecer no menu do assistente,
+# bloqueia o acesso caso ela seja alcançada por outro caminho.
+if not eh_gerente():
+    st.error("Acesso restrito ao perfil Gerente.")
+    st.stop()
 
 
 def _salvar_temp(uploaded) -> str:

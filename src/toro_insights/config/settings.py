@@ -32,10 +32,15 @@ class Settings(BaseSettings):
     log_level: str = Field("INFO", alias="LOG_LEVEL")
     log_file: Path = Field(PROJECT_ROOT / "logs" / "toro_insights.log", alias="LOG_FILE")
 
-    # Acesso ao app Streamlit (persona única: Gerente de Marketing)
+    # Acesso ao app Streamlit — perfil GERENTE (acesso total).
     # Sem defaults — obrigatório definir no .env para evitar credenciais triviais em produção.
     app_usuario: str = Field(..., alias="APP_USUARIO")
     app_senha: str = Field(..., alias="APP_SENHA")
+
+    # Perfil ASSISTENTE (acesso restrito: sem a tela "Atualizar Dados").
+    # Opcional — se vazio, não há login de assistente.
+    app_assistente_usuario: str = Field("", alias="APP_ASSISTENTE_USUARIO")
+    app_assistente_senha: str = Field("", alias="APP_ASSISTENTE_SENHA")
 
     # Assistente IA (Google Gemini)
     gemini_api_key: str = Field("", alias="GEMINI_API_KEY")
