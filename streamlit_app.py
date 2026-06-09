@@ -29,14 +29,14 @@ paginas = [
     st.Page("views/funil.py", title="Funil Comercial", icon="🫙"),
     st.Page("views/campanhas.py", title="Análise de Campanhas", icon="📣"),
     st.Page("views/geografia.py", title="Inteligência Geográfica", icon="🗺️"),
-    st.Page("views/scoring.py", title="Lead Scoring", icon="🎯"),
     st.Page("views/produtos.py", title="Análise de Produtos", icon="📦"),
     st.Page("views/assistente.py", title="Assistente IA", icon="🤖"),
     st.Page("views/exportar.py", title="Exportar Contatos", icon="📧"),
 ]
 
-# "Atualizar Dados" (cargas/limpeza/treino) é exclusiva do perfil gerente.
+# Telas exclusivas do perfil gerente: Lead Scoring e Atualizar Dados.
 if eh_gerente():
+    paginas.insert(4, st.Page("views/scoring.py", title="Lead Scoring", icon="🎯"))
     paginas.append(st.Page("views/importar.py", title="Atualizar Dados", icon="⚙️"))
 
 st.navigation(paginas).run()

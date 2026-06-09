@@ -7,12 +7,18 @@ import plotly.express as px
 import streamlit as st
 
 from toro_insights.ml import score as S
+from toro_insights.presentation.auth import eh_gerente
 from toro_insights.presentation.ui import cabecalho, fmt_int, get_dados
 
 cabecalho(
     "🎯 Lead Scoring",
     "Probabilidade de conversão (Ganho e Entregue) prevista por XGBoost.",
 )
+
+# Defesa em profundidade: tela exclusiva do perfil Gerente.
+if not eh_gerente():
+    st.error("Acesso restrito ao perfil Gerente.")
+    st.stop()
 
 bundle = S.carregar_modelo()
 if bundle is None:
