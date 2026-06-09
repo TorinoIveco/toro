@@ -11,6 +11,8 @@ FEATURES_CAT = [
     "uf",
     "cidade",
     "necessidade",
+    "produto_interesse",
+    "modelo_interesse",
     "status_relacionamento",
     "tipo_pessoa",
     "vendedor",
@@ -20,6 +22,11 @@ FEATURES_CAT = [
 FEATURES_NUM = ["tempo_resposta_horas", "mes_criacao"]
 
 TARGET = "target_ml"
+
+#: Rótulo para valores ausentes em features categóricas. Garante que uma coluna
+#: totalmente vazia (ex.: produto_interesse antes de a base ter esse dado) tenha
+#: ao menos 1 categoria — o XGBoost falha com categóricas de zero categorias.
+ROTULO_CAT_NULO = "(sem informacao)"
 
 #: Colunas PROIBIDAS como feature (RN-10) — dependem do desfecho da venda.
 FEATURES_PROIBIDAS = [
@@ -36,7 +43,8 @@ def construir_features(df: pd.DataFrame) -> pd.DataFrame:
     for c in FEATURES_CAT:
         if c not in df.columns:
             df[c] = None
-        df[c] = df[c].astype("category")
+        # fillna com placeholder evita categóricas de zero categorias (XGBoost falha).
+        df[c] = df[c].astype("string").fillna(ROTULO_CAT_NULO).astype("category")
     for c in FEATURES_NUM:
         if c not in df.columns:
             df[c] = pd.NA

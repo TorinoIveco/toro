@@ -36,8 +36,10 @@ def test_montar_planilha_filtra_email_invalido_e_deduplica():
     df = pd.DataFrame(
         [
             {"email": "a@x.com", "cliente_nome": "JOAO SILVA", "celular": "(65) 99999-9999",
+             "produto_interesse": "Caminhão", "modelo_interesse": "S-Way",
              "necessidade": "Pesado", "campanha": "Camp1"},
             {"email": "a@x.com", "cliente_nome": "JOAO SILVA", "celular": "(65) 99999-9999",
+             "produto_interesse": "Caminhão", "modelo_interesse": "S-Way",
              "necessidade": "Pesado", "campanha": "Camp1"},  # duplicado
             {"email": "***@hotmail.com", "cliente_nome": "MASC", "celular": None,
              "necessidade": None, "campanha": None},  # email mascarado -> fora
@@ -52,8 +54,18 @@ def test_montar_planilha_filtra_email_invalido_e_deduplica():
     assert linha["EMAIL"] == "a@x.com"
     assert linha["FIRSTNAME"] == "JOAO" and linha["LASTNAME"] == "SILVA"
     assert linha["SMS"] == linha["WHATSAPP"] == linha["LANDLINE_NUMBER"] == "+5565999999999"
-    assert linha["INTERESTS"] == "Pesado | Camp1"
+    assert linha["INTERESTS"] == "Caminhão | S-Way | Pesado | Camp1"
     assert linha["CONTACT ID"] == ""
+
+
+def test_interests_sem_produto_modelo_retrocompat():
+    # Base sem as colunas novas: INTERESTS cai para necessidade + campanha.
+    df = pd.DataFrame(
+        [{"email": "a@x.com", "cliente_nome": "J S", "celular": "65999999999",
+          "necessidade": "Pesado", "campanha": "Camp1"}]
+    )
+    out = brevo.montar_planilha_brevo(df)
+    assert out.iloc[0]["INTERESTS"] == "Pesado | Camp1"
 
 
 def test_montar_planilha_vazia():

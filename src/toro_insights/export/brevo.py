@@ -86,9 +86,16 @@ def montar_planilha_brevo(df: pd.DataFrame) -> pd.DataFrame:
 
     nomes = g.get("cliente_nome", pd.Series([None] * len(g))).apply(split_nome)
     fones = g.get("celular", pd.Series([None] * len(g))).apply(telefone_e164)
-    necessidade = g.get("necessidade", pd.Series([None] * len(g)))
-    campanha = g.get("campanha", pd.Series([None] * len(g)))
-    interesses = [montar_interests(n, c) for n, c in zip(necessidade, campanha)]
+    # INTERESTS: do mais acionável (o que a pessoa quer) ao mais genérico.
+    vazio = pd.Series([None] * len(g))
+    produto = g.get("produto_interesse", vazio)
+    modelo = g.get("modelo_interesse", vazio)
+    necessidade = g.get("necessidade", vazio)
+    campanha = g.get("campanha", vazio)
+    interesses = [
+        montar_interests(p, m, n, c)
+        for p, m, n, c in zip(produto, modelo, necessidade, campanha)
+    ]
 
     out = pd.DataFrame(
         {

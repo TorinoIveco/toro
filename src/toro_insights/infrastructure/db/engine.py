@@ -20,4 +20,9 @@ def get_engine() -> Engine:
         # LGPD/Segurança: oculta valores de parâmetros SQL nas mensagens de exceção,
         # evitando que PII (cliente_nome, documento, etc.) apareça em logs de erro.
         hide_parameters=True,
+        # Devolve conexões ao pool com ROLLBACK (evita 'idle in transaction'
+        # segurando locks de leitura e bloqueando o TRUNCATE da carga).
+        pool_reset_on_return="rollback",
+        # Recicla conexões ociosas (pooler do Supabase pode encerrá-las).
+        pool_recycle=1800,
     )

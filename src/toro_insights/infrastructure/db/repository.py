@@ -26,11 +26,23 @@ class CrmLeadRepository:
         with self._engine.begin() as conn:
             conn.execute(text(ddl_sql))
 
+    # ------------------------------------------------------------- leitura
+    def _ler_df(self, query, params: dict | None = None) -> pd.DataFrame:
+        """Lê um DataFrame em AUTOCOMMIT — não deixa transação aberta no pool.
+
+        Evita conexões 'idle in transaction' segurando ACCESS SHARE lock, que
+        bloqueariam o TRUNCATE da carga (RN-04).
+        """
+        conn = self._engine.connect().execution_options(isolation_level="AUTOCOMMIT")
+        try:
+            return pd.read_sql(query, conn, params=params or {})
+        finally:
+            conn.close()
+
     # ----------------------------------------------------- dim_fase_negocio
     def carregar_mapa_fases(self) -> pd.DataFrame:
         """Retorna o mapeamento fase -> bucket/ordem/flags de `dim_fase_negocio`."""
-        query = text(f"SELECT * FROM {self._schema}.dim_fase_negocio")
-        return pd.read_sql(query, self._engine)
+        return self._ler_df(text(f"SELECT * FROM {self._schema}.dim_fase_negocio"))
 
     def registrar_fases_nao_mapeadas(self, fases: list[str]) -> int:
         """Insere fases ausentes em `dim_fase_negocio` como 'A classificar'.
@@ -93,6 +105,7 @@ class CrmLeadRepository:
         Tudo em uma única transação: ou a base nova entra completa, ou nada muda.
         """
         with self._engine.begin() as conn:
+            conn.execute(text("SET LOCAL lock_timeout = '15s'"))
             conn.execute(text(f"TRUNCATE TABLE {self._schema}.crm_leads"))
             df.to_sql(
                 "crm_leads",
@@ -118,6 +131,7 @@ class CrmLeadRepository:
         preservadas. Use com confirmação explícita do usuário.
         """
         with self._engine.begin() as conn:
+            conn.execute(text("SET LOCAL lock_timeout = '15s'"))
             conn.execute(
                 text(
                     f"TRUNCATE TABLE {self._schema}.crm_leads, "
@@ -143,6 +157,7 @@ class CrmLeadRepository:
         `numeric`/`date` do banco.
         """
         with self._engine.begin() as conn:
+            conn.execute(text("SET LOCAL lock_timeout = '15s'"))
             conn.execute(text(f"TRUNCATE TABLE {self._schema}.nf_faturamento RESTART IDENTITY"))
             if df.empty:
                 # Snapshot vazio: base zerada, nada a inserir.
@@ -209,7 +224,7 @@ class CrmLeadRepository:
 
     def buscar_nf(self) -> pd.DataFrame:
         """Itens de NF para a camada de analytics de produtos."""
-        df = pd.read_sql(text(f"SELECT * FROM {self._schema}.nf_faturamento"), self._engine)
+        df = self._ler_df(text(f"SELECT * FROM {self._schema}.nf_faturamento"))
         return self._normalizar_numericos_nf(df)
 
     def buscar_nf_enriquecido(self) -> pd.DataFrame:
@@ -224,11 +239,11 @@ class CrmLeadRepository:
             JOIN {self._schema}.crm_leads c ON c.oportunidade_id = n.oportunidade_id
             """
         )
-        return self._normalizar_numericos_nf(pd.read_sql(query, self._engine))
+        return self._normalizar_numericos_nf(self._ler_df(query))
 
     def buscar_leads(self, where: str = "", params: dict | None = None) -> pd.DataFrame:
         """Leitura genérica para a camada de analytics/dashboards."""
         query = f"SELECT * FROM {self._schema}.crm_leads"
         if where:
             query += f" WHERE {where}"
-        return pd.read_sql(text(query), self._engine, params=params or {})
+        return self._ler_df(text(query), params=params or {})
