@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import pandas as pd
 import plotly.express as px
 import streamlit as st
 
@@ -32,6 +33,15 @@ def _multi(label: str, coluna: str) -> None:
     if sel:
         df = df[df[coluna].isin(sel)]
 
+
+# Filtro por Ano (derivado da data de emissão da NF).
+if "data_emissao" in df.columns:
+    _anos = pd.to_datetime(df["data_emissao"], errors="coerce").dt.year.dropna()
+    anos = sorted((int(a) for a in _anos.unique()), reverse=True)
+    if anos:
+        sel_anos = st.sidebar.multiselect("Ano", anos)
+        if sel_anos:
+            df = df[pd.to_datetime(df["data_emissao"], errors="coerce").dt.year.isin(sel_anos)]
 
 _multi("Gama", "gama")
 _multi("Estado (UF)", "uf")
